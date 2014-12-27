@@ -31,8 +31,8 @@ defmodule BooleanLogic.Or do
     end
 
     def run_epoch(training_set, weights, epoch_state) do
-        epoch_count = epoch_state[:id] + 1
-        display_epoch_header(epoch_count)
+        epoch_id = epoch_state[:id] + 1
+        display_epoch_header(epoch_id)
         epoch_results = epoch_state[:epoch_results]
 
         {weights, epoch_results} = Enum.reduce(training_set, {weights, epoch_results}, fn(test, {weights, epoch_results}) -> 
@@ -41,8 +41,8 @@ defmodule BooleanLogic.Or do
         
         epoch_success = (Enum.sum(epoch_results) / Enum.count(epoch_results)) * 100
         
-        display_epoch_footer(epoch_count, epoch_success)
-        epoch_state = %{id: epoch_count, epoch_results: []}  # Clear epoch results.
+        display_epoch_footer(epoch_id, epoch_success)
+        epoch_state = %{id: epoch_id, epoch_results: []}  # Clear epoch results.
         {epoch_success, weights, epoch_state}
     end
 
@@ -53,18 +53,25 @@ defmodule BooleanLogic.Or do
         test_answer = test_get_answer(test)
         
         neuron_output = neuron_activation_function(test_inputs, weights)
-        {is_activated, epoch_results} = is_output_correct(test_answer, neuron_output, epoch_results)
+        is_activated = is_output_correct(test_answer, neuron_output)
         if is_activated == false do
-            weights = update_weight(test_answer, 0, weights, neuron_output, @rate)
-            weights = update_weight(test_answer, 1, weights, neuron_output, @rate)
+            # We build a function to avoid having to pass the same values repeatedly.
+            weight_updater = get_weight_updater(test_answer, neuron_output, @rate)
+            weights = Enum.reduce([0, 1], weights, fn(input_idx, weights) ->
+                weight_updater.(input_idx, weights)
+            end)
         end
+        
+        epoch_results = save_test_result(epoch_results, is_activated)
         display_test_footer(test_inputs, neuron_output, is_activated)
         {weights, epoch_results}
     end
     
-    def update_weight(test_answer, input, weights, neuron_output, rate) do
-        new_weight = Enum.at(weights, input) + (rate * (test_answer - neuron_output))
-        List.replace_at(weights, input, new_weight)
+    def get_weight_updater(test_answer, neuron_output, rate) do
+        fn(input_idx, weights) -> 
+            new_weight = Enum.at(weights, input_idx) + (rate * (test_answer - neuron_output))
+            List.replace_at(weights, input_idx, new_weight)
+        end
     end
 
     def neuron_activation_function(inputs, weights) do  # Perceptron
@@ -77,11 +84,12 @@ defmodule BooleanLogic.Or do
         end
     end
 
-    def is_output_correct(test_answer, neuron_output, epoch_results) when test_answer == neuron_output do
-        {true, List.insert_at(epoch_results, Enum.count(epoch_results), 1)}
-    end
-    def is_output_correct(_, _, epoch_results) do
-        {false, List.insert_at(epoch_results, Enum.count(epoch_results), 0)}
+    def is_output_correct(test_answer, neuron_output) do
+        if test_answer == neuron_output do
+            true
+        else
+            false
+        end
     end
 
     def test_get_answer(test) do
@@ -107,7 +115,6 @@ defmodule BooleanLogic.Or do
             fill_weights(max, counter+1, weights)
     end
 
-
     def get_training_data() do
         [
             [ [ 0.0, 0.0 ], 0.0 ], 
@@ -117,14 +124,19 @@ defmodule BooleanLogic.Or do
         ]
     end
 
-    def display_epoch_header(epoch_count) do
+    def save_test_result(epoch_results, is_activated) do
+        activated = if is_activated, do: 1, else: 0
+        List.insert_at(epoch_results, Enum.count(epoch_results), activated)
+    end
+
+    def display_epoch_header(epoch_id) do
         IO.puts ""
-        IO.puts "##### Epoch #{epoch_count} #####"
+        IO.puts "##### Epoch #{epoch_id} #####"
         IO.puts "-----------------------------------------------"
     end
 
-    def display_epoch_footer(epoch_count, epoch_success) do
-        IO.puts "##### Epoch #{inspect epoch_count} : #{inspect epoch_success} #####"
+    def display_epoch_footer(epoch_id, epoch_success) do
+        IO.puts "##### Epoch #{inspect epoch_id} : #{inspect epoch_success} #####"
         IO.puts "-----------------------------------------------"
     end
 
@@ -133,7 +145,8 @@ defmodule BooleanLogic.Or do
     end
 
     def display_test_footer(test_inputs, neuron_output, is_activated) do
-        IO.puts " #{inspect Enum.at(test_inputs, 0)}, #{inspect Enum.at(test_inputs, 1)} gave #{inspect neuron_output} : #{inspect is_activated}"
+        inputs_csv = Enum.join(test_inputs, ", ")
+        IO.puts " #{inputs_csv} gave #{inspect neuron_output} : #{inspect is_activated}"
         IO.puts "-----------------------------------------------"
     end
 end
