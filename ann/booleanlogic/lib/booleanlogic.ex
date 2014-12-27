@@ -13,21 +13,18 @@ defmodule BooleanLogic.Or do
         weights = init_weights(2)
         training_set = get_training_data()
         
-        epoch_state = %{id: 0, epoch_results: []}
-        run_training(@epoch_max, training_set, weights, 0, epoch_state)
+        epoch_state = %{id: 0, epoch_results: [], epoch_success: 0}
+        run_training(training_set, weights, epoch_state)
     end
 
-    def run_training(epoch_max, _training_set, weights, epoch_success, %{id: id, epoch_results: epoch_results}) when id >= epoch_max do
-        {epoch_success, weights, %{id: id, epoch_results: epoch_results}}
-    end
-    def run_training(_epoch_max, _training_set, weights, epoch_success, %{id: id, epoch_results: epoch_results}) when epoch_success >= @threshold do
-        epoch_state = %{id: id, epoch_results: epoch_results}
-        {epoch_success, weights, epoch_state}
-    end
-    def run_training(epoch_max, training_set, weights, _epoch_success, %{id: id, epoch_results: epoch_results}) do
-        epoch_state = %{id: id, epoch_results: epoch_results}
-        {epoch_success, weights, epoch_state} = run_epoch(training_set, weights, epoch_state)
-        run_training(epoch_max, training_set, weights, epoch_success, epoch_state)
+    #def run_training(epoch_max, _training_set, weights, %{id: id, epoch_results: epoch_results, epoch_success: epoch_success}) when id >= epoch_max do
+    def run_training(training_set, weights, epoch_state) do
+        if epoch_state[:id] >= @epoch_max || epoch_state[:epoch_success] >= @threshold do
+            {weights, epoch_state}
+        else
+            {weights, epoch_state} = run_epoch(training_set, weights, epoch_state)
+            run_training(training_set, weights, epoch_state)
+        end
     end
 
     def run_epoch(training_set, weights, epoch_state) do
@@ -42,8 +39,8 @@ defmodule BooleanLogic.Or do
         epoch_success = (Enum.sum(epoch_results) / Enum.count(epoch_results)) * 100
         
         display_epoch_footer(epoch_id, epoch_success)
-        epoch_state = %{id: epoch_id, epoch_results: []}  # Clear epoch results.
-        {epoch_success, weights, epoch_state}
+        epoch_state = %{id: epoch_id, epoch_results: [], epoch_success: epoch_success}  # Clear epoch results.
+        {weights, epoch_state}
     end
 
     def run_tests(test, {weights, epoch_results}) do
@@ -67,6 +64,7 @@ defmodule BooleanLogic.Or do
         {weights, epoch_results}
     end
     
+    # This is an example of partial function application.
     def get_weight_updater(test_answer, neuron_output, rate) do
         fn(input_idx, weights) -> 
             new_weight = Enum.at(weights, input_idx) + (rate * (test_answer - neuron_output))
