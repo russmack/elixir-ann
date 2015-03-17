@@ -1,13 +1,11 @@
 defmodule BooleanLogic.Or do
     @moduledoc """
-    Neural network training of a Boolean logic Or.
+    Artificial neural network training of a Boolean logic Or.
     """
-
     # Constants
     @rate 0.2  # Weight adjustment rate.
     @threshold 98 # Threshold required for neuron to fire.
     @epoch_max 10  # For limiting the number of iterations, eg while experimenting.
-
 
     def main() do
         weights = init_weights(2)
@@ -17,7 +15,9 @@ defmodule BooleanLogic.Or do
         run_training(training_set, weights, epoch_state)
     end
 
-    #def run_training(epoch_max, _training_set, weights, %{id: id, epoch_results: epoch_results, epoch_success: epoch_success}) when id >= epoch_max do
+    @doc """
+    Run as many epochs as required for success, or limited by max.
+    """
     def run_training(training_set, weights, epoch_state) do
         if epoch_state[:id] >= @epoch_max || epoch_state[:epoch_success] >= @threshold do
             {weights, epoch_state}
@@ -27,6 +27,9 @@ defmodule BooleanLogic.Or do
         end
     end
 
+    @doc """
+    Run tests, check results, return updated weights and epoch results.
+    """
     def run_epoch(training_set, weights, epoch_state) do
         epoch_id = epoch_state[:id] + 1
         display_epoch_header(epoch_id)
@@ -43,6 +46,9 @@ defmodule BooleanLogic.Or do
         {weights, epoch_state}
     end
 
+    @doc """
+    Run the tests, update the weights according to results.
+    """
     def run_tests(test, {weights, epoch_results}) do
         display_test_header(weights)
 
@@ -52,7 +58,7 @@ defmodule BooleanLogic.Or do
         neuron_output = neuron_activation_function(test_inputs, weights)
         is_activated = is_output_correct(test_answer, neuron_output)
         if is_activated == false do
-            # We build a function to avoid having to pass the same values repeatedly.
+            # We build a function having some fixed values.
             weight_updater = get_weight_updater(test_answer, neuron_output, @rate)
             weights = Enum.reduce([0, 1], weights, fn(input_idx, weights) ->
                 weight_updater.(input_idx, weights)
@@ -64,7 +70,9 @@ defmodule BooleanLogic.Or do
         {weights, epoch_results}
     end
     
-    # This is an example of partial function application.
+    @doc """
+    A partial function, uses a closure, returns a function with fixed initial values.
+    """
     def get_weight_updater(test_answer, neuron_output, rate) do
         fn(input_idx, weights) -> 
             new_weight = Enum.at(weights, input_idx) + (rate * (test_answer - neuron_output))
@@ -72,7 +80,10 @@ defmodule BooleanLogic.Or do
         end
     end
 
-    def neuron_activation_function(inputs, weights) do  # Perceptron
+    @doc """
+    Perceptron, determines if input values and weights are sufficient to jump the synaptic gap.
+    """
+    def neuron_activation_function(inputs, weights) do
         sum = Enum.at(inputs, 0) * Enum.at(weights, 0) + Enum.at(inputs, 1) * Enum.at(weights, 1)
         threshold = 2
         if (sum > threshold) do
@@ -104,6 +115,9 @@ defmodule BooleanLogic.Or do
         Float.round(:random.uniform, 2)
     end
 
+    @doc """
+    Initialize weights.
+    """
     def init_weights(max), do: fill_weights(max, 0, [])
     def fill_weights(max, counter, weights) when counter >= max, do: weights
     def fill_weights(max, counter, weights) do
