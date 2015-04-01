@@ -1,9 +1,10 @@
 # elixir-ann
 
 Elixir implementations of artificial neural networks.
-
+<!---
+Need to get travis happy with elixir.
 [![Build Status](https://travis-ci.org/russmack/elixir-ann.svg?branch=master)](https://travis-ci.org/russmack/elixir-ann)
-
+-->
 ![Progress](http://progressed.io/bar/100?title=progress) (There will be no end.)
 
 ---
