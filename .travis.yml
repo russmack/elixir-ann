@@ -1,6 +1,6 @@
 language: elixir
 
 otp_release:
-  - 17.0
-  - 17.3
   - 17.4
+
+mix test
