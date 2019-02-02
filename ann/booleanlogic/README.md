@@ -1,16 +1,16 @@
 # Or
 
-Neural network training of a Boolean logic Or.
+Neural network training of a Boolean logic Or operation.
 
 ![Progress](http://progressed.io/bar/100?title=progress)
 
 ---
-#### Status: Done.
+#### Status: OK.
 ---
 
 ## Usage
 ```
-mix run -e BooleanLogic.Or.main()
+mix run -e BooleanLogic.Or.main
 ```
 
 ## License
