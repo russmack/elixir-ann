@@ -1,15 +1,10 @@
 language: elixir
 elixir:
-  - 1.0.0
-  - 1.0.1
-  - 1.0.2
-  - 1.0.3
+  - 1.8.0
 otp_release:
-  - 17.0
-  - 17.1
-  - 17.4
-env:
-  - ELIXIR_ERL_OPTIONS=""
-  - ELIXIR_ERL_OPTIONS="+T 9"
+  - 21.2
+#env:
+#  - ELIXIR_ERL_OPTIONS=""
+#  - ELIXIR_ERL_OPTIONS="+T 9"
 #script:
 #  - mix test
