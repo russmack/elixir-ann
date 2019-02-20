@@ -1,4 +1,23 @@
-defmodule BooleanLogic.Or do
+defmodule OperationOr do
+  #  @moduledoc """
+  #  Documentation for OperationOr.
+  #  """
+  #
+  #  @doc """
+  #  Hello world.
+  #
+  #  ## Examples
+  #
+  #      iex> OperationOr.hello()
+  #      :world
+  #
+  #  """
+  #  def hello do
+  #    :world
+  #  end
+  #end
+
+  #defmodule BooleanLogic.Or do
 
     @moduledoc """
     Artificial neural network training of a Boolean logic Or.

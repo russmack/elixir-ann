@@ -3,8 +3,3 @@ elixir:
   - 1.8.0
 otp_release:
   - 21.2
-#env:
-#  - ELIXIR_ERL_OPTIONS=""
-#  - ELIXIR_ERL_OPTIONS="+T 9"
-#script:
-#  - mix test
